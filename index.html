@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unstuck 360 — AI Doubt Solver, Doubt Connect & Study Communities</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FF',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+              900: '#312E81',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html, body { font-family: 'Inter', system-ui, sans-serif; background-color: #F8FAFC; color: #0F172A; }
+    .code-block { font-family: 'JetBrains Mono', monospace; }
+    .fade-in { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- Top Navigation -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-4">
+        <!-- Brand -->
+        <button id="brand-home-btn" class="flex items-center gap-2.5 text-left focus:outline-none group">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-sm group-hover:shadow transition">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m12.728 0l-1.414-1.414M7.05 7.05L5.636 5.636" />
+              <circle cx="12" cy="12" r="3.5" />
+            </svg>
+          </div>
+          <div>
+            <span class="font-bold text-lg tracking-tight text-slate-900">Unstuck<span class="text-indigo-600">360</span></span>
+            <span class="hidden sm:inline-block ml-1.5 text-[11px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">v2.0</span>
+          </div>
+        </button>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex items-center gap-1" id="desktop-nav">
+          <button data-view="home" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition">Home</button>
+          <button data-view="solver" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+            <span>AI Doubt Solver</span>
+          </button>
+          <button data-view="connect" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+            <span>Doubt Connect</span>
+            <span id="nav-connect-badge" class="text-[11px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Live</span>
+          </button>
+          <button data-view="qzero" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+            <span>Question Zero</span>
+            <span id="nav-qzero-count" class="text-[11px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 font-semibold">0</span>
+          </button>
+          <button data-view="groups" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition">Private Groups</button>
+        </nav>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-2.5">
+          <button id="open-ask-modal-btn" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            <span>Ask Doubt</span>
+          </button>
+          <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100" aria-label="Toggle Menu">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Drawer -->
+    <div id="mobile-nav" class="hidden md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-1">
+      <button data-view="home" class="mobile-nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium">Home</button>
+      <button data-view="solver" class="mobile-nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium">AI Doubt Solver</button>
+      <button data-view="connect" class="mobile-nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium">Doubt Connect (Live)</button>
+      <button data-view="qzero" class="mobile-nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium">Question Zero</button>
+      <button data-view="groups" class="mobile-nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium">Private Groups</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- ==================== VIEW: HOME ==================== -->
+    <section id="view-home" class="view-section space-y-12 fade-in">
+      <!-- Hero -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-10 lg:p-12 shadow-sm relative overflow-hidden">
+        <div class="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-indigo-50/80 to-transparent pointer-events-none hidden lg:block"></div>
+        <div class="grid lg:grid-cols-12 gap-8 items-center relative">
+          <div class="lg:col-span-7 space-y-5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Upgraded Reasoning Engine • Live Peer &amp; Mentor Routing
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.12]">
+              Get unstuck in seconds—with <span class="text-indigo-600">step-by-step AI</span> and real study communities.
+            </h1>
+            <p class="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
+              No rigid subject locks, no unanswered threads. Solve tough problems with structured AI reasoning, route tricky edge cases to active peers in Doubt Connect &amp; Question Zero, or collaborate inside invite-only Private Groups.
+            </p>
+            <div class="flex flex-wrap items-center gap-3 pt-1">
+              <button data-goto="solver" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition">
+                Launch AI Doubt Solver
+              </button>
+              <button data-goto="connect" class="px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-semibold text-sm transition">
+                Explore Doubt Connect
+              </button>
+              <button data-goto="groups" class="px-4 py-3 rounded-xl text-indigo-700 hover:bg-indigo-50 font-semibold text-sm transition">
+                Private Groups &rarr;
+              </button>
+            </div>
+            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100 max-w-lg">
+              <div>
+                <div class="text-xl font-bold text-slate-900">Step-by-Step</div>
+                <div class="text-xs text-slate-500">Verified AI Reasoning</div>
+              </div>
+              <div>
+                <div class="text-xl font-bold text-slate-900">&lt; 5 min</div>
+                <div class="text-xs text-slate-500">Avg. Community Reply</div>
+              </div>
+              <div>
+                <div class="text-xl font-bold text-slate-900">Zero Limits</div>
+                <div class="text-xs text-slate-500">Any Topic or Custom Tag</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Mini Preview Card -->
+          <div class="lg:col-span-5">
+            <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 shadow-xl border border-slate-800 space-y-4">
+              <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-3">
+                <span class="font-medium text-slate-200 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                  Unstuck 360 Reasoning Preview
+                </span>
+                <span class="px-2 py-0.5 rounded bg-slate-800 text-emerald-400 font-mono text-[11px]">Verified</span>
+              </div>
+              <div class="bg-slate-800/70 rounded-xl p-3 text-xs text-slate-300">
+                <span class="text-indigo-400 font-semibold">Doubt:</span> Find $\int x \cdot e^{x^2}\,dx$ and explain why $u$-substitution works here.
+              </div>
+              <div class="space-y-2 text-xs">
+                <div class="flex gap-2.5 items-start">
+                  <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 font-bold text-[11px]">1</span>
+                  <p class="text-slate-300"><strong class="text-white">Spot the inner derivative:</strong> Let $u = x^2$, so $du = 2x\,dx \implies x\,dx = \frac{1}{2}\,du$.</p>
+                </div>
+                <div class="flex gap-2.5 items-start">
+                  <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 font-bold text-[11px]">2</span>
+                  <p class="text-slate-300"><strong class="text-white">Integrate &amp; substitute back:</strong> $\frac{1}{2}\int e^u\,du = \frac{1}{2}e^{x^2} + C$.</p>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                <span class="text-[11px] text-slate-400">Still unclear? Route to 14 online math peers</span>
+                <button data-goto="solver" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">Try Solver &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Core Pillar Cards -->
+      <div class="space-y-4">
+        <div class="flex items-end justify-between">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Everything redesigned around getting you unstuck</h2>
+            <p class="text-sm text-slate-600 mt-1">Four connected tools built to eliminate dead-end answers and rigid subject barriers.</p>
+          </div>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <button data-goto="solver" class="text-left bg-white hover:border-indigo-300 border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow transition space-y-3 group">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">AI</div>
+            <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">AI Doubt Solver</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Step-by-step reasoning, formula &amp; code formatting, image upload, and contextual follow-up chat.</p>
+          </button>
+
+          <button data-goto="connect" class="text-left bg-white hover:border-emerald-300 border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow transition space-y-3 group">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">DC</div>
+            <h3 class="font-bold text-slate-900 group-hover:text-emerald-600 transition">Doubt Connect</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Live peer &amp; mentor routing with active helper availability and multi-tag flexibility across any topic.</p>
+          </button>
+
+          <button data-goto="qzero" class="text-left bg-white hover:border-amber-300 border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow transition space-y-3 group">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">Q0</div>
+            <h3 class="font-bold text-slate-900 group-hover:text-amber-600 transition">Question Zero</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Dedicated escalation queue for foundational gaps and unanswered doubts with prerequisite checks.</p>
+          </button>
+
+          <button data-goto="groups" class="text-left bg-white hover:border-violet-300 border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow transition space-y-3 group">
+            <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center font-bold">PG</div>
+            <h3 class="font-bold text-slate-900 group-hover:text-violet-600 transition">Private Groups</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Invite-only study rooms for batches, classes, and friends with private feeds and invite codes.</p>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW: AI DOUBT SOLVER ==================== -->
+    <section id="view-solver" class="view-section hidden fade-in space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">AI Doubt Solver</h1>
+          <p class="text-sm text-slate-600">Deep step-by-step reasoning across any subject—no topic restrictions.</p>
+        </div>
+        <!-- Reasoning Mode -->
+        <div class="inline-flex p-1 bg-slate-200/70 rounded-xl self-start" role="group" aria-label="Reasoning Mode">
+          <button data-mode="step" class="solver-mode-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-white text-slate-900 shadow-sm">Step-by-Step</button>
+          <button data-mode="deep" class="solver-mode-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900">Deep Reasoning</button>
+          <button data-mode="quick" class="solver-mode-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900">Quick Check</button>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-6 items-start">
+        <!-- Input Panel -->
+        <div class="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <label for="solver-input" class="text-sm font-semibold text-slate-900">Your Doubt or Problem</label>
+            <span class="text-xs text-slate-500">Any subject supported</span>
+          </div>
+          <textarea id="solver-input" rows="5" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-y" placeholder="Paste a math equation, physics problem, code snippet, or conceptual question..."></textarea>
+
+          <!-- Image / Screenshot Upload -->
+          <div class="flex items-center justify-between gap-2">
+            <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-slate-700 cursor-pointer transition">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span>Attach Question Image</span>
+              <input id="solver-image-input" type="file" accept="image/*" class="hidden" />
+            </label>
+            <span id="solver-image-name" class="text-xs text-slate-500 truncate max-w-[180px]"></span>
+          </div>
+
+          <!-- Sample Doubt Chips -->
+          <div class="space-y-1.5">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Try a sample doubt</div>
+            <div class="flex flex-wrap gap-1.5">
+              <button data-sample="calculus" class="sample-doubt-btn px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-xs font-medium text-slate-700 transition">Integration by substitution</button>
+              <button data-sample="physics" class="sample-doubt-btn px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-xs font-medium text-slate-700 transition">Projectile motion range</button>
+              <button data-sample="coding" class="sample-doubt-btn px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-xs font-medium text-slate-700 transition">Python DP / Memoization</button>
+              <button data-sample="chemistry" class="sample-doubt-btn px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-xs font-medium text-slate-700 transition">Buffer pH calculation</button>
+            </div>
+          </div>
+
+          <button id="solve-now-btn" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition flex items-center justify-center gap-2">
+            <span>Solve with AI</span>
+          </button>
+        </div>
+
+        <!-- Output & Follow-up Chat Panel -->
+        <div class="lg:col-span-7 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col min-h-[460px]">
+          <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-sm font-semibold text-slate-900">AI Solution &amp; Follow-up Thread</span>
+              <span id="active-mode-pill" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">Step-by-Step</span>
+            </div>
+            <button id="escalate-solver-btn" class="text-xs font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition">
+              Escalate to Community
+            </button>
+          </div>
+
+          <div id="solver-thread" class="flex-1 p-5 space-y-4 overflow-y-auto max-h-[520px]">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Follow-up Bar -->
+          <div class="p-4 border-t border-slate-200 bg-slate-50/70 rounded-b-2xl space-y-2.5">
+            <div class="flex flex-wrap gap-1.5">
+              <button data-followup="Explain step 2 in simpler words" class="followup-chip text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-indigo-300 text-slate-700 transition">Explain step 2 simpler</button>
+              <button data-followup="Give me a similar practice question to test myself" class="followup-chip text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-indigo-300 text-slate-700 transition">Give practice problem</button>
+              <button data-followup="What common mistake do students make here?" class="followup-chip text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-indigo-300 text-slate-700 transition">Common mistakes?</button>
+            </div>
+            <form id="solver-followup-form" class="flex gap-2">
+              <input id="solver-followup-input" type="text" class="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ask a follow-up question on this solution..." />
+              <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition">Send</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW: DOUBT CONNECT ==================== -->
+    <section id="view-connect" class="view-section hidden fade-in space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Doubt Connect</h1>
+          <p class="text-sm text-slate-600">Live peer &amp; mentor matching across any topic—with zero subject constraints.</p>
+        </div>
+        <button id="connect-post-btn" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition self-start">
+          <span>+ Post to Doubt Connect</span>
+        </button>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-6 items-start">
+        <!-- Feed -->
+        <div class="lg:col-span-8 space-y-4">
+          <!-- Filters & Search -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+            <div class="flex flex-wrap gap-1.5" id="connect-status-filters">
+              <button data-status="all" class="connect-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white">All Doubts</button>
+              <button data-status="needs_answer" class="connect-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Needs Answer</button>
+              <button data-status="solved" class="connect-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Solved</button>
+            </div>
+            <input id="connect-search-input" type="search" placeholder="Search doubts or any tag..." class="rounded-xl border border-slate-300 px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none sm:w-64" />
+          </div>
+
+          <div id="connect-feed" class="space-y-3.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Sidebar: Active Mentors & Tag Flexibility -->
+        <aside class="lg:col-span-4 space-y-4">
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3.5">
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm font-bold text-slate-900">Active Helpers Online</h2>
+              <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">18 Online</span>
+            </div>
+            <p class="text-xs text-slate-500">New doubts are automatically routed to helpers matching your tags.</p>
+            <div id="active-mentors-list" class="space-y-3">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-5 space-y-2">
+            <h3 class="text-sm font-bold text-indigo-950">No Subject Constraints</h3>
+            <p class="text-xs text-indigo-900/80 leading-relaxed">
+              Mix multiple tags or create custom topics like <span class="font-mono bg-white px-1.5 py-0.5 rounded">Bio-Stats</span> or <span class="font-mono bg-white px-1.5 py-0.5 rounded">Verilog</span>. Click any tag below to filter:
+            </p>
+            <div id="connect-popular-tags" class="flex flex-wrap gap-1.5 pt-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW: QUESTION ZERO ==================== -->
+    <section id="view-qzero" class="view-section hidden fade-in space-y-6">
+      <div class="bg-gradient-to-r from-amber-50 via-white to-indigo-50 border border-amber-200/80 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-700">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            Question Zero — Root-Cause &amp; Priority Queue
+          </div>
+          <h1 class="text-2xl font-bold text-slate-900">Solve the foundational gap before the main problem</h1>
+          <p class="text-sm text-slate-600 max-w-2xl">
+            Unanswered doubts and "why does this even work?" conceptual blockers land here with prerequisite hints and direct mentor pinging so nothing stays stuck at zero replies.
+          </p>
+        </div>
+        <button id="qzero-post-btn" class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold shadow-sm transition shrink-0 self-start">
+          + Ask a Question Zero
+        </button>
+      </div>
+
+      <div id="qzero-feed" class="grid md:grid-cols-2 gap-4">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- ==================== VIEW: PRIVATE GROUPS ==================== -->
+    <section id="view-groups" class="view-section hidden fade-in space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Private Groups &amp; Communities</h1>
+          <p class="text-sm text-slate-600">Create invite-only study rooms for your batch, classmates, or project team.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="open-join-group-btn" class="px-3.5 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-sm font-semibold transition">
+            Join with Code
+          </button>
+          <button id="open-create-group-btn" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition">
+            + Create Private Group
+          </button>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-6 items-start">
+        <!-- Group List -->
+        <div class="lg:col-span-4 space-y-3" id="groups-list">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Active Group Workspace -->
+        <div class="lg:col-span-8 bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6 space-y-5" id="group-workspace">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAL: ASK DOUBT ==================== -->
+  <div id="ask-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 fade-in">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">Ask a Doubt</h2>
+        <button id="close-ask-modal-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">&times;</button>
+      </div>
+      <form id="ask-doubt-form" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Where should this be posted?</label>
+          <select id="ask-destination" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="connect">Doubt Connect (Public Community)</option>
+            <option value="qzero">Question Zero (Foundational / Priority)</option>
+            <!-- Group options appended dynamically -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Doubt Title</label>
+          <input id="ask-title" required type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g., Why does recursion overflow stack on large N?" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Details / What you tried</label>
+          <textarea id="ask-body" required rows="3" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Share your approach or where exactly you got stuck..."></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Flexible Tags (comma-separated, any subject)</label>
+          <input id="ask-tags" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g., Python, Dynamic Programming, Exam Prep" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="cancel-ask-modal-btn" class="px-4 py-2 rounded-xl border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold">Post Doubt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: THREAD DETAIL ==================== -->
+  <div id="thread-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-xl fade-in">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
+        <h2 id="thread-modal-title" class="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">Doubt Thread</h2>
+        <button id="close-thread-modal-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 text-xl leading-none">&times;</button>
+      </div>
+      <div id="thread-modal-body" class="p-6 overflow-y-auto space-y-4 flex-1">
+        <!-- Populated by JS -->
+      </div>
+      <form id="thread-reply-form" class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex gap-2">
+        <input id="thread-reply-input" required type="text" class="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Write a helpful explanation or hint..." />
+        <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold">Reply</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CREATE / JOIN GROUP ==================== -->
+  <div id="group-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4 fade-in">
+      <div class="flex items-center justify-between">
+        <h2 id="group-modal-title" class="text-lg font-bold text-slate-900">Create Private Group</h2>
+        <button id="close-group-modal-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">&times;</button>
+      </div>
+      <form id="create-group-form" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Group Name</label>
+          <input id="group-name-input" required type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Batch B — Organic &amp; Physics" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+          <input id="group-desc-input" required type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Private doubt-solving room for our study squad" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Privacy</label>
+          <select id="group-privacy-input" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="Private (Invite Only)">Private (Invite Only)</option>
+            <option value="Open Community">Open Community</option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="cancel-group-modal-btn" class="px-4 py-2 rounded-xl border border-slate-300 text-sm font-semibold text-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold">Create Group</button>
+        </div>
+      </form>
+
+      <form id="join-group-form" class="hidden space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Enter Invite Code</label>
+          <input id="join-code-input" required type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono uppercase outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Try: JEE-SQUAD or CS101" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="cancel-join-modal-btn" class="px-4 py-2 rounded-xl border border-slate-300 text-sm font-semibold text-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold">Join Group</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // -------------------- STATE --------------------
+      const state = {
+        activeView: 'home',
+        solverMode: 'step',
+        solverMessages: [
+          {
+            role: 'ai',
+            title: 'Ready to solve any doubt step-by-step',
+            steps: [
+              'Paste a math, science, coding, or conceptual question on the left—or click a sample doubt.',
+              'Switch between Step-by-Step, Deep Reasoning, or Quick Check anytime.',
+              'Ask follow-ups below or escalate directly to Doubt Connect if you want human peers.'
+            ],
+            concept: 'Contextual AI Tutor + Community Escalation',
+            check: 'No subject lock: ask interdisciplinary or custom-topic doubts freely.'
+          }
+        ],
+        lastSolverDoubt: '',
+        connectFilter: 'all',
+        connectSearch: '',
+        connectTagFilter: '',
+        activeThreadId: null,
+        activeGroupId: 'g1',
+        mentors: [
+          { name: 'Aarav M.', specialty: 'Calculus & JEE Physics', replyTime: '~3 min', status: 'Online' },
+          { name: 'Priya S.', specialty: 'Python, DSA & Web Dev', replyTime: '~4 min', status: 'Online' },
+          { name: 'Kabir R.', specialty: 'Organic Chem & Bio', replyTime: '~6 min', status: 'Online' }
+        ],
+        doubts: [
+          {
+            id: 'd1',
+            channel: 'connect',
+            groupId: null,
+            author: 'Rohan K.',
+            time: '12m ago',
+            title: 'Why do we divide by n-1 instead of n in sample variance?',
+            body: 'I memorized Bessel’s correction for exams, but I still do not intuitively get why dividing by n underestimates population variance.',
+            tags: ['Statistics', 'Data Science', 'Concept'],
+            upvotes: 14,
+            status: 'solved',
+            routedTo: 'Aarav M. & 6 peers',
+            prereq: 'Expected value of sample mean vs population mean',
+            replies: [
+              { id: 'r1', author: 'Aarav M. (Mentor)', text: 'Because the sample mean is calculated from the same sample, points sit slightly closer to x̄ than to the true population μ. Dividing by n-1 corrects that downward bias.', accepted: true }
+            ]
+          },
+          {
+            id: 'd2',
+            channel: 'connect',
+            groupId: null,
+            author: 'Sneha T.',
+            time: '25m ago',
+            title: 'How to avoid TLE in Python when doing 2D Grid DP?',
+            body: 'My memoized recursion works for small inputs, but hits Time Limit Exceeded on 1000x1000 grids.',
+            tags: ['Python', 'Dynamic Programming', 'Algorithms'],
+            upvotes: 9,
+            status: 'needs_answer',
+            routedTo: 'Priya S. & 11 peers',
+            prereq: 'Iterative bottom-up table vs recursion overhead',
+            replies: []
+          },
+          {
+            id: 'd3',
+            channel: 'qzero',
+            groupId: null,
+            author: 'Meera V.',
+            time: '40m ago',
+            title: 'Question Zero: What actually IS a "basis" in Linear Algebra?',
+            body: 'Every textbook jumps straight into row reduction, but I feel like I missed the foundational idea of span and linear independence.',
+            tags: ['Linear Algebra', 'Foundations', 'Any Subject'],
+            upvotes: 19,
+            status: 'needs_answer',
+            routedTo: 'Priority Mentor Queue',
+            prereq: 'Vector addition, scalar multiplication & linear combinations',
+            replies: []
+          },
+          {
+            id: 'd4',
+            channel: 'qzero',
+            groupId: null,
+            author: 'Devansh P.',
+            time: '1h ago',
+            title: 'Why does electronegativity increase across a period if nuclear charge & electrons both increase?',
+            body: 'If both protons and electrons increase by 1, shouldn’t they cancel out?',
+            tags: ['Chemistry', 'Atomic Structure', 'Question Zero'],
+            upvotes: 11,
+            status: 'needs_answer',
+            routedTo: 'Kabir R. & Priority Queue',
+            prereq: 'Electron shielding in the same valence shell',
+            replies: []
+          },
+          {
+            id: 'd5',
+            channel: 'group',
+            groupId: 'g1',
+            author: 'Ananya G.',
+            time: '18m ago',
+            title: 'Mock Test #4 Q18: Rotational inertia of a hollow vs solid sphere?',
+            body: 'Can someone share the shortcut we discussed in yesterday’s evening session?',
+            tags: ['Rotational Motion', 'Mock Test 4'],
+            upvotes: 5,
+            status: 'solved',
+            routedTo: 'Batch Group (14 members)',
+            prereq: 'Mass distribution from axis of rotation',
+            replies: [
+              { id: 'r2', author: 'Vikram S.', text: 'Hollow sphere has all mass at radius R so I = (2/3)MR², solid is (2/5)MR² — solid always rolls down faster!', accepted: true }
+            ]
+          }
+        ],
+        groups: [
+          {
+            id: 'g1',
+            name: 'JEE & Physics Squad',
+            privacy: 'Private (Invite Only)',
+            code: 'JEE-SQUAD',
+            desc: 'Private room for daily mock-test doubts, formula sheets, and peer explanations.',
+            members: ['You', 'Ananya G.', 'Vikram S.', 'Aarav M.']
+          },
+          {
+            id: 'g2',
+            name: 'CS101 Algorithms Study Room',
+            privacy: 'Private (Invite Only)',
+            code: 'CS101',
+            desc: 'Invite-only group for DSA assignments, debugging help, and recursion walkthroughs.',
+            members: ['You', 'Priya S.', 'Sneha T.']
+          }
+        ]
+      };
+
+      const sampleDoubts = {
+        calculus: {
+          prompt: 'Evaluate ∫ x · e^(x²) dx and explain why u-substitution works here.',
+          title: 'Step-by-Step Solution: Integration by Substitution',
+          steps: [
+            'Identify the composite function: e^(x²) has an inner function u = x² whose derivative (2x) appears outside.',
+            'Substitute u = x² ⇒ du = 2x dx ⇒ x dx = (1/2) du.',
+            'Rewrite the integral in terms of u: ∫ (1/2) e^u du = (1/2) e^u + C.',
+            'Replace u back with x² to get the final answer: (1/2) e^(x²) + C.'
+          ],
+          concept: 'Chain Rule in Reverse (u-Substitution)',
+          check: 'Differentiate (1/2)e^(x²) + C: (1/2)·e^(x²)·(2x) = x·e^(x²). Matches the integrand!'
+        },
+        physics: {
+          prompt: 'A ball is thrown at 20 m/s at 30° above horizontal (g = 10 m/s²). Find horizontal range.',
+          title: 'Step-by-Step Solution: Projectile Range',
+          steps: [
+            'Split velocity into components: v_x = 20 cos(30°) = 10√3 m/s, and v_y = 20 sin(30°) = 10 m/s.',
+            'Find total time of flight: T = 2·v_y / g = (2 × 10) / 10 = 2.0 seconds.',
+            'Compute horizontal range: R = v_x · T = 10√3 × 2 = 20√3 ≈ 34.64 m.'
+          ],
+          concept: 'Independent Horizontal & Vertical Kinematics',
+          check: 'Using R = u² sin(2θ)/g = 400 · sin(60°)/10 = 40 × (√3/2) = 20√3 m. Confirmed!'
+        },
+        coding: {
+          prompt: 'Why is bottom-up DP often faster than @lru_cache recursion in Python for large grids?',
+          title: 'Step-by-Step Analysis: Python DP Performance',
+          steps: [
+            'Python function calls carry stack-frame and dictionary-hashing overhead for every (r, c) state.',
+            'Recursion depth can hit sys.getrecursionlimit() on 1000×1000 grids unless explicitly raised.',
+            'A bottom-up 1D/2D list loop avoids function-call overhead and uses contiguous memory, running 3–5× faster.'
+          ],
+          concept: 'Call-Stack Overhead vs. Iterative Tabulation',
+          check: 'Tip: You can also compress 2D grid DP to a 1D row array to reduce space from O(R·C) to O(C).'
+        },
+        chemistry: {
+          prompt: 'Calculate the pH of a buffer with 0.1 M CH₃COOH (pKa = 4.76) and 0.1 M CH₃COONa.',
+          title: 'Step-by-Step Solution: Henderson–Hasselbalch Equation',
+          steps: [
+            'Identify weak acid [HA] = 0.1 M and conjugate base [A⁻] = 0.1 M.',
+            'Apply Henderson–Hasselbalch: pH = pKa + log₁₀([A⁻] / [HA]).',
+            'Since [A⁻] / [HA] = 0.1 / 0.1 = 1, log₁₀(1) = 0, so pH = 4.76 + 0 = 4.76.'
+          ],
+          concept: 'Buffer Capacity & Equimolar Acid-Base Ratio',
+          check: 'When [A⁻] = [HA], pH always equals pKa, which is also the point of maximum buffer capacity.'
+        }
+      };
+
+      // -------------------- HELPERS --------------------
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function showToast(msg, tone) {
+        const container = document.getElementById('toast-container');
+        const el = document.createElement('div');
+        const bg = tone === 'warn' ? 'bg-amber-600' : 'bg-slate-900';
+        el.className = `pointer-events-auto ${bg} text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg fade-in`;
+        el.textContent = msg;
+        container.appendChild(el);
+        setTimeout(() => el.remove(), 3200);
+      }
+
+      function switchView(view) {
+        state.activeView = view;
+        document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+        const target = document.getElementById(`view-${view}`);
+        if (target) target.classList.remove('hidden');
+
+        document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
+          const active = btn.dataset.view === view;
+          btn.classList.toggle('bg-indigo-50', active);
+          btn.classList.toggle('text-indigo-700', active);
+          btn.classList.toggle('text-slate-600', !active);
+          btn.classList.toggle('hover:bg-slate-100', !active);
+        });
+        document.getElementById('mobile-nav').classList.add('hidden');
+        renderAll();
+      }
+
+      // -------------------- RENDERERS --------------------
+      function renderSolver() {
+        const container = document.getElementById('solver-thread');
+        const modeLabels = { step: 'Step-by-Step', deep: 'Deep Reasoning', quick: 'Quick Check' };
+        document.getElementById('active-mode-pill').textContent = modeLabels[state.solverMode];
+
+        container.innerHTML = state.solverMessages.map(m => {
+          if (m.role === 'user') {
+            return `
+              <div class="flex justify-end">
+                <div class="max-w-[85%] bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm shadow-xs">
+                  ${escapeHtml(m.text)}
+                </div>
+              </div>
+            `;
+          }
+          const stepsHtml = (m.steps || []).map((s, idx) => `
+            <div class="flex gap-2.5 items-start">
+              <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">${idx + 1}</span>
+              <p class="text-sm text-slate-700 leading-relaxed">${escapeHtml(s)}</p>
+            </div>
+          `).join('');
+          return `
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <h3 class="text-sm font-bold text-slate-900">${escapeHtml(m.title)}</h3>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">Verified</span>
+              </div>
+              <div class="space-y-2">${stepsHtml}</div>
+              ${m.concept ? `<div class="text-xs bg-indigo-50/80 border border-indigo-100 text-indigo-900 rounded-xl px-3 py-2"><strong>Concept:</strong> ${escapeHtml(m.concept)}</div>` : ''}
+              ${m.check ? `<div class="text-xs bg-emerald-50/80 border border-emerald-100 text-emerald-900 rounded-xl px-3 py-2"><strong>Sanity Check:</strong> ${escapeHtml(m.check)}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+      }
+
+      function doubtCardHtml(d) {
+        const isSolved = d.status === 'solved';
+        const statusBadge = isSolved
+          ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Solved (${d.replies.length})</span>`
+          : `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Needs Answer</span>`;
+
+        const tagsHtml = d.tags.map(t => `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">${escapeHtml(t)}</span>`).join('');
+
+        return `
+          <article class="bg-white border border-slate-200 hover:border-indigo-200 rounded-2xl p-4 sm:p-5 shadow-sm transition space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <span class="font-semibold text-slate-800">${escapeHtml(d.author)}</span>
+                  <span>&bull;</span>
+                  <span>${escapeHtml(d.time)}</span>
+                  <span>&bull;</span>
+                  <span class="text-indigo-600 font-medium">Routed to ${escapeHtml(d.routedTo)}</span>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">${escapeHtml(d.title)}</h3>
+              </div>
+              ${statusBadge}
+            </div>
+            <p class="text-sm text-slate-600 leading-relaxed">${escapeHtml(d.body)}</p>
+            ${d.prereq ? `<div class="text-xs text-amber-900 bg-amber-50/70 border border-amber-100 rounded-lg px-2.5 py-1.5"><strong>Prerequisite Hint:</strong> ${escapeHtml(d.prereq)}</div>` : ''}
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <div class="flex flex-wrap gap-1.5">${tagsHtml}</div>
+              <div class="flex items-center gap-2">
+                <button data-upvote="${d.id}" class="upvote-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                  <span>&#9650;</span>
+                  <span>${d.upvotes}</span>
+                </button>
+                <button data-open-thread="${d.id}" class="open-thread-btn px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition">
+                  ${d.replies.length > 0 ? `View Thread (${d.replies.length})` : 'Answer Doubt'}
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderConnect() {
+        const feed = document.getElementById('connect-feed');
+        const q = state.connectSearch.trim().toLowerCase();
+        const items = state.doubts.filter(d => {
+          if (d.channel !== 'connect') return false;
+          if (state.connectFilter !== 'all' && d.status !== state.connectFilter) return false;
+          if (state.connectTagFilter && !d.tags.some(t => t.toLowerCase() === state.connectTagFilter.toLowerCase())) return false;
+          if (q) {
+            const hay = `${d.title} ${d.body} ${d.tags.join(' ')}`.toLowerCase();
+            if (!hay.includes(q)) return false;
+          }
+          return true;
+        });
+
+        feed.innerHTML = items.length
+          ? items.map(doubtCardHtml).join('')
+          : `<div class="bg-white border border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-500">No doubts match this filter. Try clearing the search or post a new doubt!</div>`;
+
+        // Mentors
+        document.getElementById('active-mentors-list').innerHTML = state.mentors.map(m => `
+          <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div>
+              <div class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                ${escapeHtml(m.name)}
+              </div>
+              <div class="text-[11px] text-slate-500">${escapeHtml(m.specialty)}</div>
+            </div>
+            <span class="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">${escapeHtml(m.replyTime)}</span>
+          </div>
+        `).join('');
+
+        // Popular tags
+        const allTags = [...new Set(state.doubts.filter(d => d.channel === 'connect').flatMap(d => d.tags))];
+        document.getElementById('connect-popular-tags').innerHTML = allTags.map(t => {
+          const active = state.connectTagFilter === t;
+          return `<button data-tag-filter="${escapeHtml(t)}" class="tag-filter-btn text-[11px] font-semibold px-2.5 py-1 rounded-lg transition ${active ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-800 border border-indigo-200 hover:bg-indigo-100'}">${escapeHtml(t)}</button>`;
+        }).join('');
+      }
+
+      function renderQZero() {
+        const qzItems = state.doubts.filter(d => d.channel === 'qzero');
+        const unansweredCount = qzItems.filter(d => d.status === 'needs_answer').length;
+        document.getElementById('nav-qzero-count').textContent = unansweredCount;
+
+        document.getElementById('qzero-feed').innerHTML = qzItems.map(doubtCardHtml).join('');
+      }
+
+      function renderGroups() {
+        const listEl = document.getElementById('groups-list');
+        listEl.innerHTML = state.groups.map(g => {
+          const active = g.id === state.activeGroupId;
+          return `
+            <button data-select-group="${g.id}" class="select-group-btn w-full text-left p-4 rounded-2xl border transition ${active ? 'bg-indigo-50 border-indigo-300 shadow-xs' : 'bg-white border-slate-200 hover:border-slate-300'}">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-sm text-slate-900">${escapeHtml(g.name)}</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${g.privacy.includes('Private') ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700'}">${g.privacy.includes('Private') ? 'Private' : 'Open'}</span>
+              </div>
+              <p class="text-xs text-slate-600 mt-1 line-clamp-2">${escapeHtml(g.desc)}</p>
+              <div class="text-[11px] text-slate-500 mt-2">${g.members.length} members &bull; Code: <span class="font-mono font-semibold text-slate-700">${escapeHtml(g.code)}</span></div>
+            </button>
+          `;
+        }).join('');
+
+        const activeGroup = state.groups.find(g => g.id === state.activeGroupId) || state.groups[0];
+        const wsEl = document.getElementById('group-workspace');
+        if (!activeGroup) {
+          wsEl.innerHTML = '<p class="text-sm text-slate-500">Select or create a group to start.</p>';
+          return;
+        }
+        const groupDoubts = state.doubts.filter(d => d.channel === 'group' && d.groupId === activeGroup.id);
+        wsEl.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg font-bold text-slate-900">${escapeHtml(activeGroup.name)}</h2>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">${escapeHtml(activeGroup.privacy)}</span>
+              </div>
+              <p class="text-xs text-slate-600 mt-0.5">${escapeHtml(activeGroup.desc)}</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button data-copy-code="${escapeHtml(activeGroup.code)}" class="copy-code-btn px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-mono font-semibold text-slate-700">
+                Invite: ${escapeHtml(activeGroup.code)} (Copy)
+              </button>
+              <button data-post-group="${activeGroup.id}" class="post-in-group-btn px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold">
+                + Post in Group
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="font-semibold text-slate-500">Members:</span>
+            ${activeGroup.members.map(m => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${escapeHtml(m)}</span>`).join('')}
+          </div>
+
+          <div class="space-y-3">
+            ${groupDoubts.length ? groupDoubts.map(doubtCardHtml).join('') : '<div class="p-6 text-center text-sm text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">No group doubts yet. Post the first question for your squad!</div>'}
+          </div>
+        `;
+      }
+
+      function renderAskDestinations() {
+        const select = document.getElementById('ask-destination');
+        const current = select.value;
+        select.innerHTML = `
+          <option value="connect">Doubt Connect (Public Community)</option>
+          <option value="qzero">Question Zero (Foundational / Priority)</option>
+          ${state.groups.map(g => `<option value="group:${g.id}">Private Group: ${escapeHtml(g.name)}</option>`).join('')}
+        `;
+        if (current && [...select.options].some(o => o.value === current)) {
+          select.value = current;
+        }
+      }
+
+      function renderThreadModal() {
+        const d = state.doubts.find(item => item.id === state.activeThreadId);
+        if (!d) return;
+        document.getElementById('thread-modal-title').textContent = d.title;
+        const repliesHtml = d.replies.length
+          ? d.replies.map(r => `
+            <div class="p-3.5 rounded-xl border ${r.accepted ? 'bg-emerald-50/70 border-emerald-200' : 'bg-slate-50 border-slate-200'} space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-900">${escapeHtml(r.author)}</span>
+                ${r.accepted
+                  ? '<span class="text-[11px] font-semibold text-emerald-700">&#10003; Accepted Solution</span>'
+                  : `<button data-accept-reply="${r.id}" class="accept-reply-btn text-[11px] font-semibold text-indigo-600 hover:underline">Mark as Solution</button>`}
+              </div>
+              <p class="text-sm text-slate-700">${escapeHtml(r.text)}</p>
+            </div>
+          `).join('')
+          : '<p class="text-xs text-slate-500 italic">No replies yet. Be the first to help get this unstuck!</p>';
+
+        document.getElementById('thread-modal-body').innerHTML = `
+          <div class="space-y-2 pb-3 border-b border-slate-200">
+            <div class="text-xs text-slate-500">Asked by <strong class="text-slate-800">${escapeHtml(d.author)}</strong> &bull; ${escapeHtml(d.time)}</div>
+            <p class="text-sm text-slate-700 leading-relaxed">${escapeHtml(d.body)}</p>
+            <div class="flex flex-wrap gap-1.5 pt-1">${d.tags.map(t => `<span class="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700">${escapeHtml(t)}</span>`).join('')}</div>
+          </div>
+          <div class="space-y-2.5">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Community Answers</h4>
+            ${repliesHtml}
+          </div>
+        `;
+      }
+
+      function renderAll() {
+        renderSolver();
+        renderConnect();
+        renderQZero();
+        renderGroups();
+        renderAskDestinations();
+      }
+
+      // -------------------- EVENT HANDLERS --------------------
+      document.getElementById('brand-home-btn').addEventListener('click', () => switchView('home'));
+      document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+        document.getElementById('mobile-nav').classList.toggle('hidden');
+      });
+
+      document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchView(btn.dataset.view));
+      });
+      document.querySelectorAll('[data-goto]').forEach(btn => {
+        btn.addEventListener('click', () => switchView(btn.dataset.goto));
+      });
+
+      // Solver mode
+      document.querySelectorAll('.solver-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.solverMode = btn.dataset.mode;
+          document.querySelectorAll('.solver-mode-btn').forEach(b => {
+            const on = b.dataset.mode === state.solverMode;
+            b.classList.toggle('bg-white', on);
+            b.classList.toggle('text-slate-900', on);
+            b.classList.toggle('shadow-sm', on);
+            b.classList.toggle('text-slate-600', !on);
+          });
+          renderSolver();
+        });
+      });
+
+      // Image upload preview
+      document.getElementById('solver-image-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          document.getElementById('solver-image-name').textContent = `Attached: ${file.name}`;
+          showToast(`OCR ready for "${file.name}"`);
+        }
+      });
+
+      // Sample doubts
+      document.querySelectorAll('.sample-doubt-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sample = sampleDoubts[btn.dataset.sample];
+          if (!sample) return;
+          document.getElementById('solver-input').value = sample.prompt;
+          runSolverWithSample(sample);
+        });
+      });
+
+      function runSolverWithSample(sample) {
+        state.lastSolverDoubt = sample.prompt;
+        state.solverMessages.push({ role: 'user', text: sample.prompt });
+        state.solverMessages.push({
+          role: 'ai',
+          title: sample.title,
+          steps: state.solverMode === 'quick' ? [sample.steps[sample.steps.length - 1]] : sample.steps,
+          concept: sample.concept,
+          check: sample.check
+        });
+        renderSolver();
+      }
+
+      document.getElementById('solve-now-btn').addEventListener('click', () => {
+        const text = document.getElementById('solver-input').value.trim();
+        if (!text) {
+          showToast('Enter a doubt or pick a sample first.', 'warn');
+          return;
+        }
+        const matchedKey = Object.keys(sampleDoubts).find(k => sampleDoubts[k].prompt === text);
+        if (matchedKey) {
+          runSolverWithSample(sampleDoubts[matchedKey]);
+          return;
+        }
+        state.lastSolverDoubt = text;
+        state.solverMessages.push({ role: 'user', text });
+        const modeNote = state.solverMode === 'deep'
+          ? 'Deep Reasoning enabled: breaking down assumptions, edge cases, and verification.'
+          : state.solverMode === 'quick'
+            ? 'Quick Check mode: concise final takeaway.'
+            : 'Step-by-Step Tutor mode: structured breakdown.';
+        state.solverMessages.push({
+          role: 'ai',
+          title: 'Structured AI Breakdown',
+          steps: [
+            `Parse the core ask: "${text.slice(0, 100)}${text.length > 100 ? '...' : ''}"`,
+            modeNote,
+            'Identify knowns, constraints, and apply the primary rule/formula cleanly.',
+            'Verify units, boundary cases, and alternative interpretations.'
+          ],
+          concept: 'First-Principles Decomposition (Any Subject)',
+          check: 'Want a deeper walkthrough or human perspective? Use the follow-up box or Escalate to Community.'
+        });
+        renderSolver();
+      });
+
+      function sendFollowup(text) {
+        if (!text.trim()) return;
+        state.solverMessages.push({ role: 'user', text });
+        state.solverMessages.push({
+          role: 'ai',
+          title: 'Follow-up Clarification',
+          steps: [
+            `Regarding "${text}": focus on why each intermediate transformation preserves equivalence.`,
+            'Try testing with a simple boundary value (e.g., x = 0 or n = 1) to build intuition before generalizing.'
+          ],
+          concept: 'Iterative Concept Checking',
+          check: 'You can keep asking follow-ups or escalate to Doubt Connect anytime.'
+        });
+        renderSolver();
+      }
+
+      document.querySelectorAll('.followup-chip').forEach(btn => {
+        btn.addEventListener('click', () => sendFollowup(btn.dataset.followup));
+      });
+
+      document.getElementById('solver-followup-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inp = document.getElementById('solver-followup-input');
+        sendFollowup(inp.value);
+        inp.value = '';
+      });
+
+      // Escalate from Solver -> Ask Modal
+      document.getElementById('escalate-solver-btn').addEventListener('click', () => {
+        openAskModal('qzero', state.lastSolverDoubt || document.getElementById('solver-input').value.trim());
+      });
+
+      // Connect filters
+      document.querySelectorAll('.connect-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.connectFilter = btn.dataset.status;
+          document.querySelectorAll('.connect-filter-btn').forEach(b => {
+            const on = b.dataset.status === state.connectFilter;
+            b.classList.toggle('bg-slate-900', on);
+            b.classList.toggle('text-white', on);
+            b.classList.toggle('bg-slate-100', !on);
+            b.classList.toggle('text-slate-700', !on);
+          });
+          renderConnect();
+        });
+      });
+
+      document.getElementById('connect-search-input').addEventListener('input', (e) => {
+        state.connectSearch = e.target.value;
+        renderConnect();
+      });
+
+      // Delegated clicks for feeds & groups
+      document.addEventListener('click', (e) => {
+        const tagBtn = e.target.closest('.tag-filter-btn');
+        if (tagBtn) {
+          const t = tagBtn.dataset.tagFilter;
+          state.connectTagFilter = state.connectTagFilter === t ? '' : t;
+          renderConnect();
+          return;
+        }
+
+        const upBtn = e.target.closest('.upvote-btn');
+        if (upBtn) {
+          const d = state.doubts.find(x => x.id === upBtn.dataset.upvote);
+          if (d) {
+            d.upvotes += 1;
+            renderConnect();
+            renderQZero();
+            renderGroups();
+          }
+          return;
+        }
+
+        const openThreadBtn = e.target.closest('.open-thread-btn');
+        if (openThreadBtn) {
+          state.activeThreadId = openThreadBtn.dataset.openThread;
+          renderThreadModal();
+          document.getElementById('thread-modal').classList.remove('hidden');
+          return;
+        }
+
+        const acceptBtn = e.target.closest('.accept-reply-btn');
+        if (acceptBtn) {
+          const d = state.doubts.find(x => x.id === state.activeThreadId);
+          if (d) {
+            d.replies.forEach(r => { r.accepted = r.id === acceptBtn.dataset.acceptReply; });
+            d.status = 'solved';
+            renderThreadModal();
+            renderAll();
+            showToast('Marked as accepted solution!');
+          }
+          return;
+        }
+
+        const selGroupBtn = e.target.closest('.select-group-btn');
+        if (selGroupBtn) {
+          state.activeGroupId = selGroupBtn.dataset.selectGroup;
+          renderGroups();
+          return;
+        }
+
+        const copyBtn = e.target.closest('.copy-code-btn');
+        if (copyBtn) {
+          const code = copyBtn.dataset.copyCode;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(code).catch(() => {});
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = code;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (_) {}
+            ta.remove();
+          }
+          showToast(`Invite code "${code}" copied!`);
+          return;
+        }
+
+        const postGroupBtn = e.target.closest('.post-in-group-btn');
+        if (postGroupBtn) {
+          openAskModal(`group:${postGroupBtn.dataset.postGroup}`, '');
+        }
+      });
+
+      // Thread reply form
+      document.getElementById('thread-reply-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inp = document.getElementById('thread-reply-input');
+        const text = inp.value.trim();
+        const d = state.doubts.find(x => x.id === state.activeThreadId);
+        if (d && text) {
+          d.replies.push({ id: 'r' + Date.now(), author: 'You', text, accepted: false });
+          inp.value = '';
+          renderThreadModal();
+          renderAll();
+          showToast('Reply posted!');
+        }
+      });
+
+      document.getElementById('close-thread-modal-btn').addEventListener('click', () => {
+        document.getElementById('thread-modal').classList.add('hidden');
+      });
+
+      // Ask Modal
+      function openAskModal(dest, prefillTitle) {
+        renderAskDestinations();
+        if (dest) document.getElementById('ask-destination').value = dest;
+        if (prefillTitle) document.getElementById('ask-title').value = prefillTitle;
+        document.getElementById('ask-modal').classList.remove('hidden');
+      }
+
+      document.getElementById('open-ask-modal-btn').addEventListener('click', () => openAskModal('connect', ''));
+      document.getElementById('connect-post-btn').addEventListener('click', () => openAskModal('connect', ''));
+      document.getElementById('qzero-post-btn').addEventListener('click', () => openAskModal('qzero', ''));
+      document.getElementById('close-ask-modal-btn').addEventListener('click', () => document.getElementById('ask-modal').classList.add('hidden'));
+      document.getElementById('cancel-ask-modal-btn').addEventListener('click', () => document.getElementById('ask-modal').classList.add('hidden'));
+
+      document.getElementById('ask-doubt-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dest = document.getElementById('ask-destination').value;
+        const title = document.getElementById('ask-title').value.trim();
+        const body = document.getElementById('ask-body').value.trim();
+        const rawTags = document.getElementById('ask-tags').value.trim();
+        const tags = rawTags ? rawTags.split(',').map(s => s.trim()).filter(Boolean) : ['General'];
+
+        let channel = dest;
+        let groupId = null;
+        if (dest.startsWith('group:')) {
+          channel = 'group';
+          groupId = dest.split(':')[1];
+        }
+
+        state.doubts.unshift({
+          id: 'd' + Date.now(),
+          channel,
+          groupId,
+          author: 'You',
+          time: 'Just now',
+          title,
+          body,
+          tags,
+          upvotes: 1,
+          status: 'needs_answer',
+          routedTo: channel === 'qzero' ? 'Priority Mentor Queue' : channel === 'group' ? 'Private Group Members' : 'Active Peers & Mentors',
+          prereq: '',
+          replies: []
+        });
+
+        document.getElementById('ask-doubt-form').reset();
+        document.getElementById('ask-modal').classList.add('hidden');
+        switchView(channel === 'group' ? 'groups' : channel);
+        showToast('Doubt posted and routed!');
+      });
+
+      // Group Modals
+      document.getElementById('open-create-group-btn').addEventListener('click', () => {
+        document.getElementById('group-modal-title').textContent = 'Create Private Group';
+        document.getElementById('create-group-form').classList.remove('hidden');
+        document.getElementById('join-group-form').classList.add('hidden');
+        document.getElementById('group-modal').classList.remove('hidden');
+      });
+
+      document.getElementById('open-join-group-btn').addEventListener('click', () => {
+        document.getElementById('group-modal-title').textContent = 'Join Group with Code';
+        document.getElementById('create-group-form').classList.add('hidden');
+        document.getElementById('join-group-form').classList.remove('hidden');
+        document.getElementById('group-modal').classList.remove('hidden');
+      });
+
+      document.getElementById('close-group-modal-btn').addEventListener('click', () => document.getElementById('group-modal').classList.add('hidden'));
+      document.getElementById('cancel-group-modal-btn').addEventListener('click', () => document.getElementById('group-modal').classList.add('hidden'));
+      document.getElementById('cancel-join-modal-btn').addEventListener('click', () => document.getElementById('group-modal').classList.add('hidden'));
+
+      document.getElementById('create-group-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('group-name-input').value.trim();
+        const desc = document.getElementById('group-desc-input').value.trim();
+        const privacy = document.getElementById('group-privacy-input').value;
+        const code = name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase() + '-' + Math.floor(100 + Math.random() * 899);
+        const newId = 'g' + Date.now();
+        state.groups.unshift({ id: newId, name, desc, privacy, code, members: ['You'] });
+        state.activeGroupId = newId;
+        document.getElementById('create-group-form').reset();
+        document.getElementById('group-modal').classList.add('hidden');
+        renderAll();
+        showToast(`Created "${name}" (Invite: ${code})`);
+      });
+
+      document.getElementById('join-group-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+        const found = state.groups.find(g => g.code.toUpperCase() === code);
+        if (found) {
+          if (!found.members.includes('You')) found.members.push('You');
+          state.activeGroupId = found.id;
+          document.getElementById('group-modal').classList.add('hidden');
+          renderAll();
+          showToast(`Joined "${found.name}"!`);
+        } else {
+          showToast('No group found with that code. Try JEE-SQUAD or CS101.', 'warn');
+        }
+      });
+
+      // Init
+      switchView('home');
+    })();
+  </script>
+</body>
+</html>
